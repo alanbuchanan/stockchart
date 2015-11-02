@@ -1,15 +1,15 @@
 div(ng-controller='ShellCtrl').main-shell
   md-sidenav.md-sidenav-left.md-whiteframe-z2(md-component-id='left')
     md-toolbar.md-tall.md-accent
-      
+
     md-content(layout-padding='')
   md-toolbar
     .md-toolbar-tools
       md-button.md-icon-button(ng-click='toggleLeft()', aria-label='Settings')
         md-icon(md-svg-icon='navigation:menu')
-      h2
-        span
-      span(flex='')
+      h2 title
+        span thing
+      span(flex='') other
       md-menu
         md-button.md-icon-button(aria-label='Open phone interactions menu', ng-click='openMenu($mdOpenMenu, $event)')
           md-icon(md-menu-origin='', md-svg-icon='navigation:more_vert')
@@ -30,4 +30,4 @@ div(ng-controller='ShellCtrl').main-shell
             md-button(ng-click='toggleNotifications()')
               md-icon(md-svg-icon="social:notifications{{notificationsEnabled ? '_off' : ''}}")
               |               {{notificationsEnabled ? 'Disable' : 'Enable' }} notifications
-          
+
