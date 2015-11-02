@@ -15,8 +15,8 @@ angular.module('stockchartApp')
     var urlBase         = 'https://www.quandl.com/api/v3/datasets';
     var quandlCategory  = 'WIKI';
     var stockName       = 'AAPL';
-    var apiFiletype     = 'csv';
-    var startDate       = 'start_date=2014-11-01';
+    var apiFiletype     = 'json';
+    var startDate       = 'start_date=2015-10-01';
     var apiKey          = 'api_key=_KTbZgHZNzpge1azUsh8';
 
     var apiCallUrl =  urlBase         + '/' +
@@ -28,21 +28,34 @@ angular.module('stockchartApp')
 
     console.log(apiCallUrl);
 
-    var chart = c3.generate({
-      data: {
-        url: apiCallUrl
-      }
-    });
+    $http.get(apiCallUrl)
+      .success(function (data) {
 
-    //$http.get(apiCallUrl)
-    //  .success(function (data) {
-    //    var chart = c3.generate({
-    //      bindto: '#chart',
-    //      data: {
-    //        url:
-    //      }
-    //    })
-    //  });
+        var myData = data.dataset;
+
+        //Make dates array
+        myData.dates = [];
+        myData.data.forEach(function (item) {
+          myData.dates.push(item[0]);
+        });
+
+        //Make plot array
+        myData.plots = [];
+        myData.data.forEach(function (item) {
+          myData.plots.push(item[5]);
+        });
+
+        console.log(myData);
+
+        var chart = c3.generate({
+          data: {
+            rows:[
+              ['AAPL'],
+              myData.plots
+            ]
+          }
+        });
+      });
 
 
   });
