@@ -8,36 +8,24 @@ angular.module('stockchartApp')
       $scope.awesomeThings = awesomeThings;
     });
 
-    $scope.getColor = function($index) {
-      var _d = ($index + 1) % 11;
-      var bg = '';
-
-      switch(_d) {
-        case 1:       bg = 'red';         break;
-        case 2:       bg = 'green';       break;
-        case 3:       bg = 'darkBlue';    break;
-        case 4:       bg = 'blue';        break;
-        case 5:       bg = 'yellow';      break;
-        case 6:       bg = 'pink';        break;
-        case 7:       bg = 'darkBlue';    break;
-        case 8:       bg = 'purple';      break;
-        case 9:       bg = 'deepBlue';    break;
-        case 10:      bg = 'lightPurple'; break;
-        default:      bg = 'yellow';      break;
-      }
-
-      return bg;
-    };
-
-    $scope.getSpan = function($index) {
-      var _d = ($index + 1) % 11;
-
-      if (_d === 1 || _d === 5) {
-        return 2;
-      }
-    };
-
     $scope.deleteThing = function(thing) {
       $http.delete('/api/things/' + thing._id);
     };
+
+    var urlBase = 'https://www.quandl.com/api/v3/datasets';
+    var quandlCategory = 'WIKI';
+    var stockName = 'AAPL';
+    var apiFiletype = 'csv';
+    var apiKey = '_KTbZgHZNzpge1azUsh8';
+
+    $http.get(
+    urlBase         + '/' +
+    quandlCategory  + '/' +
+    stockName       + '.' +
+    apiFiletype     +
+    '?api_key='     + apiKey )
+      .success(function (data) {
+        console.log(data);
+      })
+
   });
