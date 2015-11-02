@@ -12,13 +12,6 @@ angular.module('stockchartApp')
       $http.delete('/api/things/' + thing._id);
     };
 
-    var urlBase         = 'https://www.quandl.com/api/v3/datasets';
-    var quandlCategory  = 'WIKI';
-    var stockName       = 'MSFT';
-    var apiFiletype     = 'json';
-    var startDate       = 'start_date=2014-10-01';
-    var apiKey          = 'api_key=zwfVKsRK7iy4KCdzcXaG';
-
     var apiCall = {
       urlBase: {
         name: 'https://www.quandl.com/api/v3/datasets',
@@ -58,16 +51,6 @@ angular.module('stockchartApp')
     });
 
     console.log(apiCallUrl);
-
-    console.log(apiArr);
-
-    //var apiCallUrl =  urlBase         + '/' +
-    //                  quandlCategory  + '/' +
-    //                  stockName       + '.' +
-    //                  apiFiletype     + '?' +
-    //                  startDate       + '?' +
-    //                  apiKey;
-
 
     $http.get(apiCallUrl)
       .success(function (data) {
