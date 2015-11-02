@@ -14,19 +14,60 @@ angular.module('stockchartApp')
 
     var urlBase         = 'https://www.quandl.com/api/v3/datasets';
     var quandlCategory  = 'WIKI';
-    var stockName       = 'AAPL';
+    var stockName       = 'MSFT';
     var apiFiletype     = 'json';
-    var startDate       = 'start_date=2015-10-01';
-    var apiKey          = 'api_key=_KTbZgHZNzpge1azUsh8';
+    var startDate       = 'start_date=2014-10-01';
+    var apiKey          = 'api_key=zwfVKsRK7iy4KCdzcXaG';
 
-    var apiCallUrl =  urlBase         + '/' +
-                      quandlCategory  + '/' +
-                      stockName       + '.' +
-                      apiFiletype     + '?' +
-                      startDate       + '?' +
-                      apiKey;
+    var apiCall = {
+      urlBase: {
+        name: 'https://www.quandl.com/api/v3/datasets',
+        delimiter: '/'
+      },
+      quandlCategory: {
+        name: 'WIKI',
+        delimiter: '/'
+      },
+      stock: {
+        name: 'AAPL',
+        delimiter: '.'
+      },
+      apiFileType: {
+        name: 'json',
+        delimiter: '?'
+      },
+      startDate: {
+        name: 'start_date=2014-10-01',
+        delimiter: '?'
+      },
+      apiKey: {
+        name: 'api_key=zwfVKsRK7iy4KCdzcXaG',
+        delimiter: ''
+      }
+    };
+
+    var apiCallUrl = '';
+    var apiArr = [];
+
+    Object.keys(apiCall).forEach(function (prop) {
+      apiArr.push(apiCall[prop])
+    });
+
+    apiArr.forEach(function (element) {
+      apiCallUrl += element.name + element.delimiter;
+    });
 
     console.log(apiCallUrl);
+
+    console.log(apiArr);
+
+    //var apiCallUrl =  urlBase         + '/' +
+    //                  quandlCategory  + '/' +
+    //                  stockName       + '.' +
+    //                  apiFiletype     + '?' +
+    //                  startDate       + '?' +
+    //                  apiKey;
+
 
     $http.get(apiCallUrl)
       .success(function (data) {
