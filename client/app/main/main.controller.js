@@ -12,20 +12,37 @@ angular.module('stockchartApp')
       $http.delete('/api/things/' + thing._id);
     };
 
-    var urlBase = 'https://www.quandl.com/api/v3/datasets';
-    var quandlCategory = 'WIKI';
-    var stockName = 'AAPL';
-    var apiFiletype = 'csv';
-    var apiKey = '_KTbZgHZNzpge1azUsh8';
+    var urlBase         = 'https://www.quandl.com/api/v3/datasets';
+    var quandlCategory  = 'WIKI';
+    var stockName       = 'AAPL';
+    var apiFiletype     = 'csv';
+    var startDate       = 'start_date=2014-11-01';
+    var apiKey          = 'api_key=_KTbZgHZNzpge1azUsh8';
 
-    $http.get(
-    urlBase         + '/' +
-    quandlCategory  + '/' +
-    stockName       + '.' +
-    apiFiletype     +
-    '?api_key='     + apiKey )
-      .success(function (data) {
-        console.log(data);
-      })
+    var apiCallUrl =  urlBase         + '/' +
+                      quandlCategory  + '/' +
+                      stockName       + '.' +
+                      apiFiletype     + '?' +
+                      startDate       + '?' +
+                      apiKey;
+
+    console.log(apiCallUrl);
+
+    var chart = c3.generate({
+      data: {
+        url: apiCallUrl
+      }
+    });
+
+    //$http.get(apiCallUrl)
+    //  .success(function (data) {
+    //    var chart = c3.generate({
+    //      bindto: '#chart',
+    //      data: {
+    //        url:
+    //      }
+    //    })
+    //  });
+
 
   });
