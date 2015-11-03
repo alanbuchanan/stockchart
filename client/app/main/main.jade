@@ -8,10 +8,18 @@ div(ng-include='"components/shell/shell.html"')
 //      h3 {{thing.name}}
 
 #chart hello
-button#delete
+
+button#delete(ng-click='delete()')
   | delete
 
 br
 
-button#add
+button#add(ng-click='submitApiRequest()')
   | add!
+
+form
+  select(ng-model='apiCall.stock.name')
+    option AAPL
+    option MSFT
+    //input(ng-click='submitApiRequest('AAPL')' type='submit')
+
