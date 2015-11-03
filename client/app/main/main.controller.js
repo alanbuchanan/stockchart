@@ -77,15 +77,22 @@ angular.module('stockchartApp')
         // View url in console
         console.log(myData);
 
+        var jsonArr = [];
+
+        myData.data.forEach(function (element) {
+          jsonArr.push({name: element[0], val: element[5]});
+        });
+
+        console.log(jsonArr);
+
+
         // Declare the c3 chart
         var chart = c3.generate({
-
           data: {
-            json: {
-              data1: myData.plots
-            },
+            json: jsonArr,
             keys: {
-              x: myData.dates
+              x: 'name',
+              value: ['val']
             }
           },
           axis: {
@@ -104,3 +111,7 @@ angular.module('stockchartApp')
 
 
   });
+
+  // TODO: implement model to accept multiple stocks to chart
+  // TODO: label 'val' to be the stock in question
+  // TODO: implement input and backend
