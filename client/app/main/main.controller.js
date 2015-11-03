@@ -5,150 +5,115 @@ angular.module('stockchartApp')
     //**************************************************************
     // Build a URL string for the query
     //**************************************************************
-    var apiCall = {
-      urlBase: {
-        delimiter: '',
-        name: 'https://www.quandl.com/api/v3/datasets'
-      },
-      quandlCategory: {
-        delimiter: '/',
-        name: 'WIKI'
-      },
-      stock: {
-        delimiter: '/',
-        name: 'AAPL'
-      },
-      apiFileType: {
-        delimiter: '.',
-        name: 'json'
-      },
-      startDate: {
-        delimiter: '?',
-        // TODO: Make the start date a date set to one month ago using Date object
-        name: 'start_date=2015-10-01'
-      },
-      order: {
-        delimiter: '&',
-        name: 'order=asc'
-      },
-      //limit:{
-      //  delimiter: '?',
-      //  name: 'limit=20'
-      //},
-      apiKey: {
-        delimiter: '&',
-        name: 'api_key=zwfVKsRK7iy4KCdzcXaG'
-      }
+
+    var stocks = ['AAPL', 'MSFT', 'MMM'];
+
+    var currentUrl = '';
+
+    var createQuandlQueryUrl = function (stockName) {
+      currentUrl = 'https://www.quandl.com/api/v3/datasets/WIKI/' + stockName + '.json' +
+          '?start_date=2015-10-01' +
+          '&order=asc' +
+          '&api_key=zwfVKsRK7iy4KCdzcXaG';
     };
 
-    var apiArr = [];
-    var apiCallUrl = '';
+    var stocksUrlsList = [];
 
-    Object.keys(apiCall).forEach(function (prop) {
-      apiArr.push(apiCall[prop])
+    stocks.forEach(function (stock) {
+      createQuandlQueryUrl(stock);
+      stocksUrlsList.push(currentUrl);
     });
 
-    apiArr.forEach(function (element) {
-      apiCallUrl += element.delimiter + element.name;
-    });
-
-    console.log(apiCallUrl);
+    console.log(stocksUrlsList);
 
     //**************************************************************
     // Request data from Quandl
     //**************************************************************
-    $http.get(apiCallUrl)
-      .success(function (data) {
 
-        var myData = data.dataset;
+    var datesToGraph = [];
 
-        // Make dates array
-        myData.dates = [];
-        myData.data.forEach(function (item) {
-          myData.dates.push(item[0]);
-        });
+    var init = function () {
+      $http.get(stocksUrlsList[0])
+        .success(function (data) {
+          var myData = data.dataset;
 
-        myData.dates.unshift('x');
-        console.log('dates: ', myData.dates);
+          // Make dates array
+          myData.dates = [];
+          myData.data.forEach(function (item) {
+            myData.dates.push(item[0]);
+          });
 
-        // Make plot array
-        myData.plots = [];
-        myData.data.forEach(function (item) {
-          myData.plots.push(item[5]);
-        });
+          myData.dates.unshift('x');
+          console.log('dates: ', myData.dates);
 
-        myData.plots.unshift(myData.name);
-        console.log('plots: ', myData.plots);
+          datesToGraph = myData.dates;
 
-        // View url in console
-        console.log(myData);
+        })
+        .error(function (error) {
+          console.log(error);
+        })
+    };
+    init();
 
-        var jsonArr = [];
-
-        myData.data.forEach(function (element) {
-          jsonArr.push({name: element[0], val: element[5]});
-        });
-
-        console.log(jsonArr);
-
-        // Declare the c3 chart
-        var chart = c3.generate({
-          data: {
-            x: 'x',
-            columns: [
-              myData.dates,
-              myData.plots
-            ]
-          },
-          axis: {
-            x: {
-              type: 'timeseries',
-              tick: {
-                format: '%Y-%m-%d'
-              }
-            }
+    // Declare the c3 chart
+    var chart = c3.generate({
+      data: {
+        x: 'x',
+        columns: [
+          datesToGraph
+        ]
+      },
+      axis: {
+        x: {
+          type: 'timeseries',
+          tick: {
+            format: '%Y-%m-%d'
           }
-        });
+        }
+      }
+    });
 
-        setTimeout(function () {
+    $scope.submitApiRequest = function () {
+      console.log('hello from submit');
+      $http.get(stocksUrlsList[0])
+        .success(function (data) {
+
+          var myData = data.dataset;
+
+          // Make plot array
+          myData.plots = [];
+          myData.data.forEach(function (item) {
+            myData.plots.push(item[5]);
+          });
+
+          myData.plots.unshift(myData.name);
+          console.log('plots: ', myData.plots);
+
+          // View url in console
+          console.log(myData);
+
+          var jsonArr = [];
+
+          myData.data.forEach(function (element) {
+            jsonArr.push({name: element[0], val: element[5]});
+          });
+
+          console.log(jsonArr);
+
           chart.load({
-            columns: [
-              ['data3', 400, 500, 450000, 7000000, 600, 50000000]
-            ]
-          });
-        }, 3000);
+              columns: [
+                myData.plots
+              ]
+          })
 
-        setTimeout(function () {
-          chart.unload({
-            ids: ['data3']
-          });
-        }, 3000);
+        })
 
+        .error(function (err) {
+          console.log('There was a problem: ', err);
+        });
+      };
 
-        // Declare the c3 chart
-        //var chart = c3.generate({
-        //  data: {
-        //    json: jsonArr,
-        //    keys: {
-        //      x: 'name',
-        //      value: ['val']
-        //    }
-        //  },
-        //  axis: {
-        //    x: {
-        //      type: 'timeseries',
-        //      tick: {
-        //        format: '%Y-%m-%d'
-        //      }
-        //    }
-        //  }
-        //});
-
-      })
-      .error(function (err) {
-        console.log('There was a problem: ', err);
-      });
-
+    //submitApiRequest();
 
   });
 
