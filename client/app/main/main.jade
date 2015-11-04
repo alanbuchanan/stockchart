@@ -11,20 +11,10 @@ div(ng-include='"components/shell/shell.html"')
 
 section(layout="row")
   div(ng-repeat='stock in stocks')
-    md-button.md-raised(ng-click="removeStock(stock)")
+    md-button.md-raised(ng-click="removeStock(stock, $index)")
       | {{stock}}
       span#close
         | &nbsp;&times;
-
-br
-
-button#delete(ng-click='delete()')
-  | delete
-
-br
-
-button#add(ng-click='add()')
-  | add!
 
 br
 

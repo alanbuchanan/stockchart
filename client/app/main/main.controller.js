@@ -161,13 +161,14 @@ angular.module('stockchartApp')
     };
     //Toast end*****************************************************
 
-    $scope.removeStock = function (stockName) {
+    $scope.removeStock = function (stockName, index) {
       console.log(stockName);
       chart.unload({
         ids: [
           stockName
         ]
-      })
+      });
+      $scope.stocks.splice(index, 1);
     };
 
     $scope.add = function () {
@@ -187,7 +188,7 @@ angular.module('stockchartApp')
             myData.plots.push(item[5]);
           });
 
-          myData.plots.unshift(stockNameTruncate(myData.name));
+          myData.plots.unshift(myData.dataset_code);
           console.log('plots: ', myData.plots);
 
           chart.load({
@@ -195,6 +196,8 @@ angular.module('stockchartApp')
               myData.plots
             ]
           });
+
+          $scope.stocks.push(myData.dataset_code);
 
         })
         .error(function (error) {
