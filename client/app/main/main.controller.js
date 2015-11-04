@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('stockchartApp')
-  .controller('MainCtrl', function ($scope, $http) {
+  .controller('MainCtrl', function ($scope, $http, $mdToast) {
     //**************************************************************
     // Build a URL string for the query
     //**************************************************************
@@ -74,7 +74,7 @@ angular.module('stockchartApp')
 
           console.log(resultArr);
 
-          if(resultArr.length === stocksUrls.length){
+          if (resultArr.length === stocksUrls.length) {
             //Declare the c3 chart and init with value
             chart = c3.generate({
               data: {
@@ -93,7 +93,7 @@ angular.module('stockchartApp')
               }
             });
 
-             //Fill in the chart with remainder of array
+            //Fill in the chart with remainder of array
             for (var i = 1; i < resultArr.length; i++) {
               chart.load({
                 columns: [
@@ -118,6 +118,42 @@ angular.module('stockchartApp')
     };
 
     $scope.userTypedStockName = '';
+
+    var last = {
+      bottom: false,
+      top: true,
+      left: false,
+      right: true
+    };
+
+    //Toast start*****************************************************
+    $scope.toastPosition = angular.extend({},last);
+
+    function sanitizePosition() {
+      var current = $scope.toastPosition;
+      if ( current.bottom && last.top ) current.top = false;
+      if ( current.top && last.bottom ) current.bottom = false;
+      if ( current.right && last.left ) current.left = false;
+      if ( current.left && last.right ) current.right = false;
+      last = angular.extend({},current);
+    }
+
+    $scope.getToastPosition = function() {
+      sanitizePosition();
+      return Object.keys($scope.toastPosition)
+        .filter(function(pos) { return $scope.toastPosition[pos]; })
+        .join(' ');
+    };
+
+    var showSimpleToast = function() {
+      $mdToast.show(
+        $mdToast.simple()
+          .content('Please enter a valid stock name.')
+          .position($scope.getToastPosition())
+          .hideDelay(3000)
+      );
+    };
+    //Toast end*****************************************************
 
     $scope.add = function () {
 
@@ -147,15 +183,16 @@ angular.module('stockchartApp')
 
         })
         .error(function (error) {
-          console.log(error);
+          console.log('ERR:', error);
+          showSimpleToast();
         });
+
+      $scope.userTypedStockName = '';
 
     }
 
-
   });
 
-// TODO: implement add capability
 // TODO: implement buttons with remove properties
 // TODO: Change number format from 8000000 to 8.0, or similar
 // TODO: label 'val' to be the stock in question
