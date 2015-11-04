@@ -1,33 +1,31 @@
-'use strict';
 
+'use strict';
 angular.module('stockchartApp')
-  .controller('MainCtrl', function ($scope, $http, $mdToast) {
+.controller('MainCtrl', function ($scope, $http, $mdToast) {
+
     //**************************************************************
     // Build a URL string for the query
     //**************************************************************
+    $scope.userTypedStockName = '';
 
     $scope.stocks = [];
-
     $http.get('/api/stocks').success(function (stocksFromDb) {
 
-      stocksFromDb.forEach(function (stock, index) {
-        $scope.stocks.push(stock.name[0])
-      });
-      console.log($scope.stocks);
-      console.log('suck ass', stocksFromDb);
+      // Will post a stock if empty to avoid errors
+      if(stocksFromDb.length === 0){
+        $scope.stocks = ['AAPL'];
+      } else {
+        stocksFromDb.forEach(function (stock, index) {
+          $scope.stocks.push(stock.name[0])
+        });
+        console.log($scope.stocks);
 
-      //Test post request
-      //$http.post('/api/stocks', {name: 'MMM'}).success(function () {
-      //
-      //  console.log('suck bum');
-      //}).error(function (error) {
-      //  console.log(error);
-      //});
+        console.log(stocksFromDb);
+      }
 
       //$scope.stocks = ['AAPL', 'EA', 'EBAY', 'F', 'G', 'H', 'L', 'B', 'P', 'DIS'];
 
       var currentUrl = '';
-
       var createQuandlQueryUrl = function (stockName) {
         currentUrl = 'https://www.quandl.com/api/v3/datasets/WIKI/' + stockName + '.json' +
           '?start_date=2015-10-01' +
@@ -40,6 +38,7 @@ angular.module('stockchartApp')
         return name.substr(0, indexOfEndBracket + 1);
       };
 
+
       var stocksUrls = [];
 
       $scope.stocks.forEach(function (stock) {
@@ -47,9 +46,8 @@ angular.module('stockchartApp')
         stocksUrls.push(currentUrl);
       });
 
+
       console.log(stocksUrls);
-
-
       // Init
       stocksUrls.forEach(function (stockUrl) {
 
@@ -122,25 +120,24 @@ angular.module('stockchartApp')
             console.log(error);
           })
       });
+
       //**************************************************************
       // Request data from Quandl
       //**************************************************************
-
       var datesToGraph = [];
       var plotsInit = [];
+
       var chart;
 
       var resultArr = [];
 
       console.log('resultArr: ', resultArr);
-
       $scope.delete = function () {
         chart.unload({
           ids: ['Apple Inc. (AAPL)', 'eBay Inc. (EBAY) Prices, Dividends, Splits and Trading Volume']
         });
       };
 
-      $scope.userTypedStockName = '';
 
       //Toast start*****************************************************
       var last = {
@@ -203,49 +200,47 @@ angular.module('stockchartApp')
         console.log('current URL:', currentUrl);
 
         if ($scope.stocks.indexOf($scope.userTypedStockName === -1)) {
-        $http.get(currentUrl)
-          .success(function (data) {
+          $http.get(currentUrl)
+            .success(function (data) {
 
-            var myData = data.dataset;
-            console.log(myData);
+              var myData = data.dataset;
+              console.log(myData);
 
-            // Make plot array
-            myData.plots = [];
-            myData.data.forEach(function (item) {
-              myData.plots.push(item[5]);
+              // Make plot array
+              myData.plots = [];
+              myData.data.forEach(function (item) {
+                myData.plots.push(item[5]);
+              });
+
+              myData.plots.unshift(myData.dataset_code);
+              console.log('plots: ', myData.plots);
+
+              chart.load({
+                columns: [
+                  myData.plots
+                ]
+              });
+
+              $scope.stocks.push(myData.dataset_code);
+
+              $http.post('/api/stocks', {name: $scope.userTypedStockName.toUpperCase()}).success(function () {
+                console.log('post req successful');
+              }).error(function (error) {
+                console.log(error);
+              });
+
+              $scope.userTypedStockName = '';
+            })
+            .error(function (error) {
+              console.log('ERR:', error);
+              showSimpleToast();
             });
-
-            myData.plots.unshift(myData.dataset_code);
-            console.log('plots: ', myData.plots);
-
-            chart.load({
-              columns: [
-                myData.plots
-              ]
-            });
-
-            $scope.stocks.push(myData.dataset_code);
-
-            $http.post('/api/stocks', {name: $scope.userTypedStockName.toUpperCase()}).success(function () {
-              console.log('suck bum');
-            }).error(function (error) {
-              console.log(error);
-            });
-
-            $scope.userTypedStockName = '';
-          })
-          .error(function (error) {
-            console.log('ERR:', error);
-            showSimpleToast();
-          });
         }
       }
     });
 
   });
 
-// TODO: implement endpoint for array of stock names
-// TODO: prevent database upsertion
 // TODO: Make code dry, because there are repeating parts, especially with adding information to graph
 // TODO: Implement factory for angular material toast
 // TODO: find out if you can change the label because it would be nice to have 'Apple Inc (AAPL)' as opposed to just '(AAPL)'
@@ -253,3 +248,5 @@ angular.module('stockchartApp')
 // TODO: explore angular material docs for cool stuff to add, eg fixing top menu with FAB toolbar
 // TODO: Improve appearance of chart - look through C3 docs
 // TODO: Incorporate abhisekp's solution for loading the data on init instead of that for loop
+// TODO: favicon and title
+// TODO: clear input field after user enters invalid stock name
