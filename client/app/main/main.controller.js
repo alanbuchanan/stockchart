@@ -241,12 +241,13 @@ angular.module('stockchartApp')
 
   });
 
-// TODO: Make code dry, because there are repeating parts, especially with adding information to graph
-// TODO: Implement factory for angular material toast
-// TODO: find out if you can change the label because it would be nice to have 'Apple Inc (AAPL)' as opposed to just '(AAPL)'
-// TODO: Change number format from 8000000 to 8.0, or similar
-// TODO: explore angular material docs for cool stuff to add, eg fixing top menu with FAB toolbar
-// TODO: Improve appearance of chart - look through C3 docs
-// TODO: Incorporate abhisekp's solution for loading the data on init instead of that for loop
-// TODO: favicon and title
 // TODO: clear input field after user enters invalid stock name
+// TODO: Make controller code dry, because there are repeating parts, especially with adding information to graph
+// TODO: c3: is there a way to init the chart without a stock inserted?
+// TODO: Change number format from 8000000 to 8.0, or similar
+// TODO: Implement factory for angular material toast
+// TODO: Incorporate abhisekp's solution for loading the data on init instead of that for loop
+// TODO: Improve appearance of chart - look through C3 docs
+// TODO: favicon and title
+// TODO: explore angular material docs for cool stuff to add, eg fixing top menu with FAB toolbar
+// TODO: find out if you can change the label because it would be nice to have 'Apple Inc (AAPL)' as opposed to just '(AAPL)'
