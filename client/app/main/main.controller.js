@@ -211,7 +211,10 @@ angular.module('stockchartApp')
 
   });
 
-// TODO: implement buttons with remove properties
+// TODO: implement endpoint for array of stock names
+// TODO: Make code dry, because there are repeating parts, especially with adding information to graph
+// TODO: Implement factory for angular material toast
+// TODO: find out if you can change the label because it would be nice to have 'Apple Inc (AAPL)' as opposed to just '(AAPL)'
 // TODO: Change number format from 8000000 to 8.0, or similar
-// TODO: label 'val' to be the stock in question
-// TODO: implement input and backend
+// TODO: explore angular material docs for cool stuff to add, eg fixing top menu with FAB toolbar
+// TODO: Improve appearance of chart - look through C3 docs
