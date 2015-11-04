@@ -52,6 +52,7 @@
 .things-list .purple {
   background: #b388ff; }
 
+
 .things-list .lightPurple {
   background: #8c9eff; }
 
@@ -86,4 +87,8 @@
   bottom: 0;
   right: 0;
   z-index: 1;
+}
+
+#close {
+  color: darkgray;
 }
