@@ -6,7 +6,7 @@ angular.module('stockchartApp')
     // Build a URL string for the query
     //**************************************************************
 
-    var stocks = ['AAPL', 'MSFT', 'MMM'];
+    $scope.stocks = ['AAPL', 'EA', 'EBAY'];
 
     var currentUrl = '';
 
@@ -19,7 +19,7 @@ angular.module('stockchartApp')
 
     var stocksUrls = [];
 
-    stocks.forEach(function (stock) {
+    $scope.stocks.forEach(function (stock) {
       createQuandlQueryUrl(stock);
       stocksUrls.push(currentUrl);
     });
@@ -41,6 +41,9 @@ angular.module('stockchartApp')
 
       $http.get(stockUrl)
         .success(function (data) {
+
+          console.log('current URL:', currentUrl);
+
 
           var myData = data.dataset;
           console.log(myData);
@@ -100,13 +103,6 @@ angular.module('stockchartApp')
             }
 
           }
-
-          var jsonArr = [];
-
-          myData.data.forEach(function (element) {
-            jsonArr.push({name: element[0], val: element[5]});
-          });
-
         })
         .error(function (error) {
           console.log(error);
@@ -117,15 +113,45 @@ angular.module('stockchartApp')
 
     $scope.delete = function () {
       chart.unload({
-        ids: ['3M Company (MMM) Prices, Dividends, Splits and Trading Volume']
+        ids: ['Apple Inc. (AAPL)', 'eBay Inc. (EBAY) Prices, Dividends, Splits and Trading Volume']
       });
-    }
+    };
+
+    $scope.userTypedStockName = '';
 
     $scope.add = function () {
-      chart.load({
-        columns: [resultArr[2]]
-      })
+
+      createQuandlQueryUrl($scope.userTypedStockName);
+      console.log('current URL:', currentUrl);
+
+      $http.get(currentUrl)
+        .success(function (data) {
+
+          var myData = data.dataset;
+          console.log(myData);
+
+          // Make plot array
+          myData.plots = [];
+          myData.data.forEach(function (item) {
+            myData.plots.push(item[5]);
+          });
+
+          myData.plots.unshift(myData.name);
+          console.log('plots: ', myData.plots);
+
+          chart.load({
+            columns: [
+              myData.plots
+            ]
+          });
+
+        })
+        .error(function (error) {
+          console.log(error);
+        });
+
     }
+
 
   });
 

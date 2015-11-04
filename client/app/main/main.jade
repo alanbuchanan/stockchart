@@ -17,9 +17,8 @@ br
 button#add(ng-click='add()')
   | add!
 
-form
-  select(ng-model='apiCall.stock.name')
-    option AAPL
-    option MSFT
-    //input(ng-click='submitApiRequest('AAPL')' type='submit')
+form(ng-submit='add()')
+  input(ng-model='userTypedStockName')
+
+| {{userTypedStockName}}
 
