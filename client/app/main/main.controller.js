@@ -71,40 +71,41 @@ angular.module('stockchartApp')
 
           resultArr.push(myData.plots);
 
-          // View url in console
-          console.log(myData);
+          console.log(resultArr.concat());
+
+          if(resultArr.length === stocksUrls.length){
+            //Declare the c3 chart
+            chart = c3.generate({
+              data: {
+                x: 'x',
+                columns: [
+                  datesToGraph, resultArr[0]
+                ]
+              },
+              axis: {
+                x: {
+                  type: 'timeseries',
+                  tick: {
+                    format: '%Y-%m-%d'
+                  }
+                }
+              }
+            });
+
+            for (var i = 1; i < resultArr.length; i++) {
+              chart.load({
+                columns: [
+                  resultArr[i]
+                ]
+              })
+            }
+
+          }
 
           var jsonArr = [];
 
           myData.data.forEach(function (element) {
             jsonArr.push({name: element[0], val: element[5]});
-          });
-
-          console.log(jsonArr);
-          plotsInit = jsonArr;
-
-          // Declare the c3 chart
-          chart = c3.generate({
-            data: {
-              x: 'x',
-              columns: [
-                datesToGraph, myData.plots
-              ]
-            },
-            axis: {
-              x: {
-                type: 'timeseries',
-                tick: {
-                  format: '%Y-%m-%d'
-                }
-              }
-            }
-          });
-
-          chart.load({
-            columns: [
-              myData.plots
-            ]
           });
 
         })
