@@ -6,7 +6,7 @@ angular.module('stockchartApp')
     // Build a URL string for the query
     //**************************************************************
 
-    $scope.stocks = ['AAPL', 'EA', 'EBAY', 'F', 'G', 'H', 'L', 'B', 'P', 'G', 'DIS'];
+    $scope.stocks = ['AAPL', 'EA', 'EBAY', 'F', 'G', 'H', 'L', 'B', 'P', 'DIS'];
 
     var currentUrl = '';
 
@@ -16,6 +16,11 @@ angular.module('stockchartApp')
         '&order=asc' +
         '&api_key=zwfVKsRK7iy4KCdzcXaG';
     };
+      var stockNameTruncate = function (name) {
+        // TODO: Improve for cases where the bracket you should target is the last one, not the first
+        var indexOfEndBracket = name.indexOf(')');
+        return name.substr(0, indexOfEndBracket + 1);
+      };
 
     var stocksUrls = [];
 
@@ -27,6 +32,79 @@ angular.module('stockchartApp')
     console.log(stocksUrls);
 
 
+    // Init
+    stocksUrls.forEach(function (stockUrl) {
+
+      $http.get(stockUrl)
+      .success(function (data) {
+
+
+
+        console.log('current URL:', currentUrl);
+        var myData = data.dataset;
+
+        console.log(myData);
+        // Make dates array
+        myData.dates = [];
+
+        myData.data.forEach(function (item) {
+          myData.dates.push(item[0]);
+        });
+        myData.dates.unshift('x');
+
+        console.log('dates: ', myData.dates);
+
+        datesToGraph = myData.dates;
+
+        var myData = data.dataset;
+        // Make plot array
+        myData.plots = [];
+
+        myData.data.forEach(function (item) {
+          myData.plots.push(item[5]);
+        });
+
+        myData.plots.unshift(myData.dataset_code);
+        console.log('plots: ', myData.plots);
+
+        resultArr.push(myData.plots);
+
+        console.log(resultArr);
+
+        if (resultArr.length === stocksUrls.length) {
+          //Declare the c3 chart and init with value
+          chart = c3.generate({
+            data: {
+              x: 'x',
+              columns: [
+                datesToGraph, resultArr[0]
+              ]
+            },
+            axis: {
+              x: {
+                type: 'timeseries',
+                tick: {
+                  format: '%Y-%m-%d'
+                }
+              }
+            }
+          });
+
+          //Fill in the chart with remainder of array
+          for (var i = 1; i < resultArr.length; i++) {
+            chart.load({
+              columns: [
+                resultArr[i]
+              ]
+            })
+          }
+
+        }
+      })
+        .error(function (error) {
+          console.log(error);
+        })
+    });
     //**************************************************************
     // Request data from Quandl
     //**************************************************************
@@ -34,85 +112,8 @@ angular.module('stockchartApp')
     var datesToGraph = [];
     var plotsInit = [];
     var chart;
+
     var resultArr = [];
-
-    // Init
-    stocksUrls.forEach(function (stockUrl) {
-
-      $http.get(stockUrl)
-        .success(function (data) {
-
-          console.log('current URL:', currentUrl);
-
-
-          var myData = data.dataset;
-          console.log(myData);
-
-          // Make dates array
-          myData.dates = [];
-          myData.data.forEach(function (item) {
-            myData.dates.push(item[0]);
-          });
-
-          myData.dates.unshift('x');
-          console.log('dates: ', myData.dates);
-
-          datesToGraph = myData.dates;
-
-          var myData = data.dataset;
-
-          // Make plot array
-          myData.plots = [];
-          myData.data.forEach(function (item) {
-            myData.plots.push(item[5]);
-          });
-
-          var truncate = function (name) {
-            var indexOfEndBracket = name.indexOf(')');
-            return name.substr(0, indexOfEndBracket + 1);
-          };
-
-          myData.plots.unshift(truncate(myData.name));
-          console.log('plots: ', myData.plots);
-
-          resultArr.push(myData.plots);
-
-          console.log(resultArr);
-
-          if (resultArr.length === stocksUrls.length) {
-            //Declare the c3 chart and init with value
-            chart = c3.generate({
-              data: {
-                x: 'x',
-                columns: [
-                  datesToGraph, resultArr[0]
-                ]
-              },
-              axis: {
-                x: {
-                  type: 'timeseries',
-                  tick: {
-                    format: '%Y-%m-%d'
-                  }
-                }
-              }
-            });
-
-            //Fill in the chart with remainder of array
-            for (var i = 1; i < resultArr.length; i++) {
-              chart.load({
-                columns: [
-                  resultArr[i]
-                ]
-              })
-            }
-
-          }
-        })
-        .error(function (error) {
-          console.log(error);
-        })
-    });
 
     console.log('resultArr: ', resultArr);
 
@@ -160,6 +161,15 @@ angular.module('stockchartApp')
     };
     //Toast end*****************************************************
 
+    $scope.removeStock = function (stockName) {
+      console.log(stockName);
+      chart.unload({
+        ids: [
+          stockName
+        ]
+      })
+    };
+
     $scope.add = function () {
 
       createQuandlQueryUrl($scope.userTypedStockName);
@@ -177,7 +187,7 @@ angular.module('stockchartApp')
             myData.plots.push(item[5]);
           });
 
-          myData.plots.unshift(myData.name);
+          myData.plots.unshift(stockNameTruncate(myData.name));
           console.log('plots: ', myData.plots);
 
           chart.load({
