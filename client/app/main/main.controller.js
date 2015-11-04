@@ -6,7 +6,7 @@ angular.module('stockchartApp')
     // Build a URL string for the query
     //**************************************************************
 
-    $scope.stocks = ['AAPL', 'EA', 'EBAY'];
+    $scope.stocks = ['AAPL', 'EA', 'EBAY', 'F', 'G', 'H', 'L', 'B', 'P', 'G', 'DIS'];
 
     var currentUrl = '';
 
@@ -67,7 +67,12 @@ angular.module('stockchartApp')
             myData.plots.push(item[5]);
           });
 
-          myData.plots.unshift(myData.name);
+          var truncate = function (name) {
+            var indexOfEndBracket = name.indexOf(')');
+            return name.substr(0, indexOfEndBracket + 1);
+          };
+
+          myData.plots.unshift(truncate(myData.name));
           console.log('plots: ', myData.plots);
 
           resultArr.push(myData.plots);
@@ -119,6 +124,7 @@ angular.module('stockchartApp')
 
     $scope.userTypedStockName = '';
 
+    //Toast start*****************************************************
     var last = {
       bottom: false,
       top: true,
@@ -126,7 +132,6 @@ angular.module('stockchartApp')
       right: true
     };
 
-    //Toast start*****************************************************
     $scope.toastPosition = angular.extend({},last);
 
     function sanitizePosition() {
