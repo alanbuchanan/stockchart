@@ -139,7 +139,7 @@ angular.module('stockchartApp')
                   show: false
                 },
                 legend: {
-                  position: 'right'
+                  position: 'bottom'
                 }
               });
 
