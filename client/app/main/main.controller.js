@@ -290,7 +290,6 @@ angular.module('stockchartApp')
     $mdThemingProvider.theme('default')
       .primaryPalette('amber');
   });
-// TODO: set date or make limit of data loaded
-// TODO: Improve appearance of chart - look through C3 docs
-// TODO: favicon and title
+
 // TODO: Invalidate form if it is loading in graph to prevent it adding false stock code like YU when user is typing it in too fast
+// TODO: Set other possible timeframes in tabs - currently at 6, potential for more
