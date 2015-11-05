@@ -10,6 +10,9 @@ angular.module('stockchartApp')
       // Will post a stock if empty to avoid errors
       if(stocksFromDb.length === 0){
         $scope.stocks = ['AAPL'];
+        $http.post('/api/stocks', {name: 'AAPL'}).success(function () {
+          console.log('added apple');
+        })
       } else {
         stocksFromDb.forEach(function (stock, index) {
           $scope.stocks.push(stock.name[0])
@@ -42,8 +45,12 @@ angular.module('stockchartApp')
         stocksUrls.push(currentUrl);
       });
 
-
       console.log(stocksUrls);
+
+      var codesArray = [];
+      var namesArray = [];
+      var namesObject = {};
+
       // Init
       stocksUrls.forEach(function (stockUrl) {
 
@@ -72,7 +79,7 @@ angular.module('stockchartApp')
             myData.plots = [];
 
             myData.data.forEach(function (item) {
-              myData.plots.push(item[5]);
+              myData.plots.push(item[1]);
             });
 
             myData.plots.unshift(myData.dataset_code);
@@ -82,12 +89,25 @@ angular.module('stockchartApp')
 
             console.log(resultArr);
 
+            codesArray.push(myData.dataset_code);
+            console.log('codesArray: ', codesArray);
+
+            namesArray.push(myData.name.substr(0, myData.name.indexOf(')') + 1));
+            console.log('namesArray: ', namesArray);
+
+            codesArray.forEach(function (code, index) {
+              namesObject[code] = namesArray[index];
+            });
+
+            console.log('namesObject: ', namesObject);
+
             if (resultArr.length === stocksUrls.length) {
               //Declare the c3 chart and init with value
               chart = c3.generate({
                 data: {
                   x: 'x',
-                  columns: [datesToGraph].concat(resultArr)
+                  columns: [datesToGraph].concat(resultArr),
+                  names: namesObject
                 },
                 axis: {
                   x: {
@@ -106,9 +126,7 @@ angular.module('stockchartApp')
           })
       });
 
-      //**************************************************************
-      // Request data from Quandl
-      //**************************************************************
+
       var datesToGraph = [];
       var plotsInit = [];
 
@@ -122,6 +140,11 @@ angular.module('stockchartApp')
           ids: ['Apple Inc. (AAPL)', 'eBay Inc. (EBAY) Prices, Dividends, Splits and Trading Volume']
         });
       };
+
+
+      //**************************************************************
+      // Request data from Quandl
+      //**************************************************************
 
 
       // Toast start*****************************************************
@@ -164,7 +187,7 @@ angular.module('stockchartApp')
 
       $scope.moreThanOneLeft = function (array) {
         return array.length >= 2;
-      }
+      };
 
       $scope.removeStock = function (stockName, index) {
 
@@ -212,7 +235,7 @@ angular.module('stockchartApp')
               // Make plot array
               myData.plots = [];
               myData.data.forEach(function (item) {
-                myData.plots.push(item[5]);
+                myData.plots.push(item[1]);
               });
 
               myData.plots.unshift(myData.dataset_code);
@@ -233,6 +256,20 @@ angular.module('stockchartApp')
               });
 
               $scope.userTypedStockName = '';
+
+              codesArray.push(myData.dataset_code);
+              console.log('codesArray: ', codesArray);
+
+              namesArray.push(myData.name.substr(0, myData.name.indexOf(')') + 1));
+              console.log('namesArray: ', namesArray);
+
+              codesArray.forEach(function (code, index) {
+                namesObject[code] = namesArray[index];
+              });
+
+              console.log('namesObject: ', namesObject);
+
+              chart.data.names(namesObject)
             })
             .error(function (error) {
               console.log('ERR:', error);
@@ -255,10 +292,6 @@ angular.module('stockchartApp')
   });
 
 // TODO: Make controller code dry, because there are repeating parts, especially with adding information to graph
-// TODO: Make controller code dry, because there are repeating parts, especially with adding information to graph
-
-// TODO: Change number format from 8000000 to 8.0, or similar
-// TODO: find out if you can change the label because it would be nice to have 'Apple Inc (AAPL)' as opposed to just '(AAPL)'
 
 // TODO: Improve appearance of chart - look through C3 docs
 // TODO: favicon and title
