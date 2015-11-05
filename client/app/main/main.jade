@@ -1,16 +1,9 @@
 div(ng-include='"components/shell/shell.html"')
 
-//md-grid-list.things-list(md-cols-sm='1', md-cols-md='2', md-cols-gt-md='5', md-row-height-gt-md='1:1', md-row-height='4:3', md-gutter='8px', md-gutter-gt-sm='4px')
-//  md-grid-tile(ng-repeat='thing in awesomeThings', ng-class='getColor($index)', md-rowspan='{{getSpan($index)}}', md-colspan='{{getSpan($index)}}', md-colspan-sm='1')
-//
-//    md-icon.avatar-icon(md-svg-icon='avatar:svg-{{ ($index + 1) % 11 }}')
-//    md-grid-tile-footer
-//      h3 {{thing.name}}
-
-#chart hello
+#chart
 
 section(layout="row")
-  div(ng-repeat='stock in stocks')
+  div(ng-repeat='stock in stocks track by $index')
     md-button.md-raised(ng-click="removeStock(stock, $index)")
       | {{stock}}
       span#close
@@ -20,6 +13,4 @@ br
 
 form(ng-submit='add()')
   input(ng-model='userTypedStockName', placeholder="Add stock")
-
-| {{userTypedStockName}}
 
