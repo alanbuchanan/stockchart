@@ -3,13 +3,11 @@ angular.module('stockchartApp')
   .controller('MainCtrl', function ($scope, $http, $mdToast) {
 
     $scope.stocks = [];
-
     $scope.isLoading = false;
 
     $http.get('/api/stocks').success(function (stocksFromDb) {
 
       $scope.isLoading = false;
-
       // Will post a stock if empty to avoid errors
       if (stocksFromDb.length === 0) {
         $scope.stocks = ['AAPL'];
@@ -20,8 +18,8 @@ angular.module('stockchartApp')
         stocksFromDb.forEach(function (stock, index) {
           $scope.stocks.push(stock.name[0])
         });
-        console.log($scope.stocks);
 
+        console.log($scope.stocks);
         console.log(stocksFromDb);
       }
 
@@ -30,12 +28,20 @@ angular.module('stockchartApp')
       var namesArray = [];
       var namesObject = {};
       var stocksUrls = [];
+      $scope.userTypedStockName = '';
 
+      var clearUserInput = function () {
+        $scope.userTypedStockName = '';
+      };
+
+      // Limit is set to 128, aka 6 months worth of results. there is the potential to add more options to how many months/years displayed
       var createQuandlQueryUrl = function (stockName) {
-        currentUrl = 'https://www.quandl.com/api/v3/datasets/WIKI/' + stockName + '.json' +
-          '?start_date=2015-10-01' +
-          '&order=asc' +
-          '&api_key=zwfVKsRK7iy4KCdzcXaG';
+        if (stockName) {
+          currentUrl = 'https://www.quandl.com/api/v3/datasets/WIKI/' + stockName + '.json' +
+            '?order=desc' +
+            '&limit=128' +
+            '&api_key=zwfVKsRK7iy4KCdzcXaG';
+        }
       };
 
       // Create an array of urls for all stock names grabbed from db
@@ -52,28 +58,30 @@ angular.module('stockchartApp')
 
       var namesObjectifier = function (myData) {
         codesArray.push(myData.dataset_code);
-        console.log('codesArray: ', codesArray);
 
+        console.log('codesArray: ', codesArray);
         namesArray.push(stockNameTruncate(myData.name));
+
         console.log('namesArray: ', namesArray);
 
         codesArray.forEach(function (code, index) {
           namesObject[code] = namesArray[index];
         });
-
         console.log('namesObject: ', namesObject);
       };
 
       var makePlots = function (myData) {
+
         myData.plots = [];
 
         myData.data.forEach(function (item) {
           myData.plots.push(item[1]);
         });
-
         myData.plots.unshift(myData.dataset_code);
         console.log('plots: ', myData.plots);
       };
+
+
       // Helper methods end ****************************************************
 
       // Init: make dates and plots arrays and load graph
@@ -124,6 +132,12 @@ angular.module('stockchartApp')
                       format: '%Y-%m-%d'
                     }
                   }
+                },
+                point: {
+                  show: false
+                },
+                legend: {
+                  position: 'right'
                 }
               });
 
@@ -135,15 +149,12 @@ angular.module('stockchartApp')
             console.log(error);
           })
       });
-
-
       var datesToGraph = [];
       var plotsInit = [];
       var chart;
       var resultArr = [];
 
       console.log('resultArr: ', resultArr);
-
 
       // Toast start*****************************************************
       var last = {
@@ -154,7 +165,6 @@ angular.module('stockchartApp')
       };
 
       $scope.toastPosition = angular.extend({}, last);
-
       function sanitizePosition() {
         var current = $scope.toastPosition;
         if (current.bottom && last.top) current.top = false;
@@ -181,8 +191,8 @@ angular.module('stockchartApp')
             .hideDelay(3000)
         );
       };
-      // Toast end*****************************************************
 
+      // Toast end*****************************************************
       $scope.moreThanOneLeft = function (array) {
         return array.length >= 2;
       };
@@ -207,16 +217,9 @@ angular.module('stockchartApp')
           }).error(function (error) {
             console.log('delete error: ', error);
           });
-
         } else {
           console.log('wont delete because only 1 left');
         }
-      };
-
-      $scope.userTypedStockName = '';
-
-      var clearUserInput = function () {
-        $scope.userTypedStockName = '';
       };
 
       // Executed when user enters a stock code
@@ -285,8 +288,9 @@ angular.module('stockchartApp')
   // Angular Material theme
   .config(function ($mdThemingProvider) {
     $mdThemingProvider.theme('default')
-      .primaryPalette('blue-grey');
+      .primaryPalette('amber');
   });
-
+// TODO: set date or make limit of data loaded
 // TODO: Improve appearance of chart - look through C3 docs
 // TODO: favicon and title
+// TODO: Invalidate form if it is loading in graph to prevent it adding false stock code like YU when user is typing it in too fast
