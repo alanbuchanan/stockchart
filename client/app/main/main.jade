@@ -22,7 +22,7 @@ div(ng-include='"components/shell/shell.html"')
 
   // Buttons with remove capability
   section(layout="row", layout-wrap, ng-hide="isLoading")
-    div(ng-repeat='stock in stocks')
+    div(ng-repeat='stock in stocks track by $index')
       md-button.md-raised(ng-click="removeStock(stock, $index)")
         | {{stock}}
         span#close(ng-show='moreThanOneLeft(stocks)')
