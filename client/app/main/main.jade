@@ -6,7 +6,7 @@ div(ng-include='"components/shell/shell.html"')
       form(ng-submit="add()", autocomplete="off")
         md-input-container
           md-icon(md-svg-src="content:send")
-          input(ng-model="userTypedStockName", type="text", placeholder="Add a stock")
+          input(ng-model="userTypedStockName", type="text", placeholder="Add a stock", style='text-transform:uppercase')
 
   // Loading spinner
   div(ng-show="isLoading", layout="row", layout-sm="column", layout-align="space-around")
