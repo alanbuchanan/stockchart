@@ -26,15 +26,13 @@ angular.module('stockchartApp')
       if (stocksFromDb.length === 0) {
         $scope.stocks = ['AAPL'];
         $http.post('/api/stocks', {name: 'AAPL'}).success(function () {
-          console.log('added apple');
+
         })
       } else {
         stocksFromDb.forEach(function (stock, index) {
           $scope.stocks.push(stock.name[0])
         });
 
-        console.log($scope.stocks);
-        console.log(stocksFromDb);
       }
 
       var currentUrl = '';
@@ -73,15 +71,11 @@ angular.module('stockchartApp')
       var namesObjectifier = function (myData) {
         codesArray.push(myData.dataset_code);
 
-        console.log('codesArray: ', codesArray);
         namesArray.push(stockNameTruncate(myData.name));
-
-        console.log('namesArray: ', namesArray);
 
         codesArray.forEach(function (code, index) {
           namesObject[code] = namesArray[index];
         });
-        console.log('namesObject: ', namesObject);
       };
 
       var makePlots = function (myData) {
@@ -92,7 +86,7 @@ angular.module('stockchartApp')
           myData.plots.push(item[1]);
         });
         myData.plots.unshift(myData.dataset_code);
-        console.log('plots: ', myData.plots);
+
       };
 
 
@@ -106,10 +100,8 @@ angular.module('stockchartApp')
 
             $scope.isLoading = true;
 
-            console.log('current URL:', currentUrl);
             var myData = data.dataset;
 
-            console.log(myData);
             // Make dates array
             myData.dates = [];
 
@@ -118,15 +110,11 @@ angular.module('stockchartApp')
             });
             myData.dates.unshift('x');
 
-            console.log('dates: ', myData.dates);
-
             datesToGraph = myData.dates;
 
             // Make plot array
             makePlots(myData);
             resultArr.push(myData.plots);
-
-            console.log(resultArr);
 
             // Turn graph labels into full stock names
             namesObjectifier(myData);
@@ -167,8 +155,6 @@ angular.module('stockchartApp')
       var plotsInit = [];
       var chart;
       var resultArr = [];
-
-      console.log('resultArr: ', resultArr);
 
       // Toast start*****************************************************
       var last = {
@@ -216,7 +202,6 @@ angular.module('stockchartApp')
 
         if ($scope.moreThanOneLeft($scope.stocks)) {
 
-          console.log(stockName);
           chart.unload({
             ids: [
               stockName
@@ -227,7 +212,6 @@ angular.module('stockchartApp')
 
           // Delete from back end array
           $http.delete('/api/stocks/' + stockName).success(function () {
-            console.log('deleted');
           }).error(function (error) {
             console.log('delete error: ', error);
           });
@@ -241,21 +225,17 @@ angular.module('stockchartApp')
 
         // Make the user entry uppercase
         $scope.userTypedStockName = $scope.userTypedStockName.toUpperCase();
-        console.log($scope.stocks);
 
         if ($scope.stocks.indexOf($scope.userTypedStockName) === -1) {
           // User entered a valid stock code
-          console.log('index of ' + $scope.userTypedStockName + ' is ' + $scope.stocks.indexOf($scope.userTypedStockName));
 
           createQuandlQueryUrl($scope.userTypedStockName);
-          console.log('current URL:', currentUrl);
 
           $http.get(currentUrl)
             .success(function (data) {
               $scope.isLoading = true;
 
               var myData = data.dataset;
-              console.log(myData);
 
               // Make plot array
               makePlots(myData);
@@ -271,7 +251,6 @@ angular.module('stockchartApp')
 
               // Post to back end array
               $http.post('/api/stocks', {name: $scope.userTypedStockName.toUpperCase()}).success(function () {
-                console.log('post req successful');
               }).error(function (error) {
                 console.log(error);
               });
@@ -284,14 +263,13 @@ angular.module('stockchartApp')
             })
             .error(function (error) {
               // User entered a non-existent stock code
-              console.log('ERR:', error);
+              console.log(error);
               showSimpleToast('Please enter a valid stock code.');
               clearUserInput();
             });
 
         } else {
           // User entered a stock code that is already present
-          console.log('dupe');
           showSimpleToast('That stock is already on the graph.');
           clearUserInput();
         }
