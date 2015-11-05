@@ -6,7 +6,7 @@ section(layout="row")
   div(ng-repeat='stock in stocks track by $index')
     md-button.md-raised(ng-click="removeStock(stock, $index)")
       | {{stock}}
-      span#close
+      span#close(ng-show='moreThanOneLeft(stocks)')
         | &nbsp;&times;
 
 br

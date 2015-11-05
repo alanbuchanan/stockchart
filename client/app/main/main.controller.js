@@ -124,7 +124,7 @@ angular.module('stockchartApp')
       };
 
 
-      //Toast start*****************************************************
+      // Toast start*****************************************************
       var last = {
         bottom: false,
         top: true,
@@ -160,23 +160,32 @@ angular.module('stockchartApp')
             .hideDelay(3000)
         );
       };
-      //Toast end*****************************************************
+      // Toast end*****************************************************
+
+      $scope.moreThanOneLeft = function (array) {
+        return array.length >= 2;
+      }
 
       $scope.removeStock = function (stockName, index) {
 
-        console.log(stockName);
-        chart.unload({
-          ids: [
-            stockName
-          ]
-        });
-        $scope.stocks.splice(index, 1);
+        if($scope.moreThanOneLeft($scope.stocks)){
 
-        $http.delete('/api/stocks/' + stockName).success(function () {
-          console.log('deleted');
-        }).error(function (error) {
-          console.log('delete error: ', error);
-        });
+          console.log(stockName);
+          chart.unload({
+            ids: [
+              stockName
+            ]
+          });
+          $scope.stocks.splice(index, 1);
+
+          $http.delete('/api/stocks/' + stockName).success(function () {
+            console.log('deleted');
+          }).error(function (error) {
+            console.log('delete error: ', error);
+          });
+        } else {
+          console.log('wont delete because only 1 left');
+        }
       };
 
       $scope.userTypedStockName = '';
@@ -239,22 +248,18 @@ angular.module('stockchartApp')
     });
 
   })
-//**************************************************************
-// Build a URL string for the query
-//**************************************************************
 .config(function($mdThemingProvider) {
     $mdThemingProvider.theme('default')
       .primaryPalette('blue-grey')
       .accentPalette('orange');
   });
 
-// TODO: Prevent delete if array length is 1
-// TODO: Implement factory for angular material toast
-// TODO: Improve appearance of chart - look through C3 docs
+// TODO: Make controller code dry, because there are repeating parts, especially with adding information to graph
 // TODO: Make controller code dry, because there are repeating parts, especially with adding information to graph
 
 // TODO: Change number format from 8000000 to 8.0, or similar
 // TODO: find out if you can change the label because it would be nice to have 'Apple Inc (AAPL)' as opposed to just '(AAPL)'
 
+// TODO: Improve appearance of chart - look through C3 docs
 // TODO: favicon and title
 
