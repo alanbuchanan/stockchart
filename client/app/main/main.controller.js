@@ -1,7 +1,6 @@
-
 'use strict';
 angular.module('stockchartApp')
-.controller('MainCtrl', function ($scope, $http, $mdToast) {
+  .controller('MainCtrl', function ($scope, $http, $mdToast) {
 
     $scope.stocks = [];
 
@@ -12,7 +11,7 @@ angular.module('stockchartApp')
       $scope.isLoading = false;
 
       // Will post a stock if empty to avoid errors
-      if(stocksFromDb.length === 0){
+      if (stocksFromDb.length === 0) {
         $scope.stocks = ['AAPL'];
         $http.post('/api/stocks', {name: 'AAPL'}).success(function () {
           console.log('added apple');
@@ -26,43 +25,64 @@ angular.module('stockchartApp')
         console.log(stocksFromDb);
       }
 
-      //$scope.stocks = ['AAPL', 'EA', 'EBAY', 'F', 'G', 'H', 'L', 'B', 'P', 'DIS'];
-
       var currentUrl = '';
+      var codesArray = [];
+      var namesArray = [];
+      var namesObject = {};
+      var stocksUrls = [];
+
       var createQuandlQueryUrl = function (stockName) {
         currentUrl = 'https://www.quandl.com/api/v3/datasets/WIKI/' + stockName + '.json' +
           '?start_date=2015-10-01' +
           '&order=asc' +
           '&api_key=zwfVKsRK7iy4KCdzcXaG';
       };
-      var stockNameTruncate = function (name) {
-        // TODO: Improve for cases where the bracket you should target is the last one, not the first
-        var indexOfEndBracket = name.indexOf(')');
-        return name.substr(0, indexOfEndBracket + 1);
-      };
 
-
-      var stocksUrls = [];
-
+      // Create an array of urls for all stock names grabbed from db
       $scope.stocks.forEach(function (stock) {
         createQuandlQueryUrl(stock);
         stocksUrls.push(currentUrl);
       });
 
-      console.log(stocksUrls);
+      // Helper methods begin ****************************************************
+      var stockNameTruncate = function (name) {
+        var indexOfEndBracket = name.indexOf(')');
+        return name.substr(0, indexOfEndBracket + 1);
+      };
 
-      var codesArray = [];
-      var namesArray = [];
-      var namesObject = {};
+      var namesObjectifier = function (myData) {
+        codesArray.push(myData.dataset_code);
+        console.log('codesArray: ', codesArray);
 
-      // Init
+        namesArray.push(stockNameTruncate(myData.name));
+        console.log('namesArray: ', namesArray);
+
+        codesArray.forEach(function (code, index) {
+          namesObject[code] = namesArray[index];
+        });
+
+        console.log('namesObject: ', namesObject);
+      };
+
+      var makePlots = function (myData) {
+        myData.plots = [];
+
+        myData.data.forEach(function (item) {
+          myData.plots.push(item[1]);
+        });
+
+        myData.plots.unshift(myData.dataset_code);
+        console.log('plots: ', myData.plots);
+      };
+      // Helper methods end ****************************************************
+
+      // Init: make dates and plots arrays and load graph
       stocksUrls.forEach(function (stockUrl) {
 
         $http.get(stockUrl)
           .success(function (data) {
 
             $scope.isLoading = true;
-
 
             console.log('current URL:', currentUrl);
             var myData = data.dataset;
@@ -80,32 +100,14 @@ angular.module('stockchartApp')
 
             datesToGraph = myData.dates;
 
-            var myData = data.dataset;
             // Make plot array
-            myData.plots = [];
-
-            myData.data.forEach(function (item) {
-              myData.plots.push(item[1]);
-            });
-
-            myData.plots.unshift(myData.dataset_code);
-            console.log('plots: ', myData.plots);
-
+            makePlots(myData);
             resultArr.push(myData.plots);
 
             console.log(resultArr);
 
-            codesArray.push(myData.dataset_code);
-            console.log('codesArray: ', codesArray);
-
-            namesArray.push(myData.name.substr(0, myData.name.indexOf(')') + 1));
-            console.log('namesArray: ', namesArray);
-
-            codesArray.forEach(function (code, index) {
-              namesObject[code] = namesArray[index];
-            });
-
-            console.log('namesObject: ', namesObject);
+            // Turn graph labels into full stock names
+            namesObjectifier(myData);
 
             if (resultArr.length === stocksUrls.length) {
               //Declare the c3 chart and init with value
@@ -137,22 +139,10 @@ angular.module('stockchartApp')
 
       var datesToGraph = [];
       var plotsInit = [];
-
       var chart;
-
       var resultArr = [];
 
       console.log('resultArr: ', resultArr);
-      $scope.delete = function () {
-        chart.unload({
-          ids: ['Apple Inc. (AAPL)', 'eBay Inc. (EBAY) Prices, Dividends, Splits and Trading Volume']
-        });
-      };
-
-
-      //**************************************************************
-      // Request data from Quandl
-      //**************************************************************
 
 
       // Toast start*****************************************************
@@ -197,9 +187,10 @@ angular.module('stockchartApp')
         return array.length >= 2;
       };
 
+      // Executed when user presses a delete button
       $scope.removeStock = function (stockName, index) {
 
-        if($scope.moreThanOneLeft($scope.stocks)){
+        if ($scope.moreThanOneLeft($scope.stocks)) {
 
           console.log(stockName);
           chart.unload({
@@ -207,13 +198,16 @@ angular.module('stockchartApp')
               stockName
             ]
           });
+          // Delete from front end array
           $scope.stocks.splice(index, 1);
 
+          // Delete from back end array
           $http.delete('/api/stocks/' + stockName).success(function () {
             console.log('deleted');
           }).error(function (error) {
             console.log('delete error: ', error);
           });
+
         } else {
           console.log('wont delete because only 1 left');
         }
@@ -221,15 +215,19 @@ angular.module('stockchartApp')
 
       $scope.userTypedStockName = '';
 
+      var clearUserInput = function () {
+        $scope.userTypedStockName = '';
+      };
+
+      // Executed when user enters a stock code
       $scope.add = function () {
 
-
+        // Make the user entry uppercase
         $scope.userTypedStockName = $scope.userTypedStockName.toUpperCase();
-
         console.log($scope.stocks);
 
         if ($scope.stocks.indexOf($scope.userTypedStockName) === -1) {
-
+          // User entered a valid stock code
           console.log('index of ' + $scope.userTypedStockName + ' is ' + $scope.stocks.indexOf($scope.userTypedStockName));
 
           createQuandlQueryUrl($scope.userTypedStockName);
@@ -243,13 +241,7 @@ angular.module('stockchartApp')
               console.log(myData);
 
               // Make plot array
-              myData.plots = [];
-              myData.data.forEach(function (item) {
-                myData.plots.push(item[1]);
-              });
-
-              myData.plots.unshift(myData.dataset_code);
-              console.log('plots: ', myData.plots);
+              makePlots(myData);
 
               chart.load({
                 columns: [
@@ -257,53 +249,44 @@ angular.module('stockchartApp')
                 ]
               });
 
+              // Post to front end array
               $scope.stocks.push($scope.userTypedStockName);
 
+              // Post to back end array
               $http.post('/api/stocks', {name: $scope.userTypedStockName.toUpperCase()}).success(function () {
                 console.log('post req successful');
               }).error(function (error) {
                 console.log(error);
               });
 
-              $scope.userTypedStockName = '';
+              clearUserInput();
+              namesObjectifier(myData);
+              chart.data.names(namesObject);
 
-              codesArray.push(myData.dataset_code);
-              console.log('codesArray: ', codesArray);
-
-              namesArray.push(myData.name.substr(0, myData.name.indexOf(')') + 1));
-              console.log('namesArray: ', namesArray);
-
-              codesArray.forEach(function (code, index) {
-                namesObject[code] = namesArray[index];
-              });
-
-              console.log('namesObject: ', namesObject);
-
-              chart.data.names(namesObject)
               $scope.isLoading = false;
             })
             .error(function (error) {
+              // User entered a non-existent stock code
               console.log('ERR:', error);
               showSimpleToast('Please enter a valid stock code.');
-              $scope.userTypedStockName = '';
+              clearUserInput();
             });
+
         } else {
+          // User entered a stock code that is already present
           console.log('dupe');
           showSimpleToast('That stock is already on the graph.');
-          $scope.userTypedStockName = '';
+          clearUserInput();
         }
       }
     });
 
   })
-.config(function($mdThemingProvider) {
+  // Angular Material theme
+  .config(function ($mdThemingProvider) {
     $mdThemingProvider.theme('default')
-      .primaryPalette('blue-grey')
-      .accentPalette('orange');
+      .primaryPalette('blue-grey');
   });
-
-// TODO: Make controller code dry, because there are repeating parts, especially with adding information to graph
 
 // TODO: Improve appearance of chart - look through C3 docs
 // TODO: favicon and title
-
