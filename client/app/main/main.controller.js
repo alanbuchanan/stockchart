@@ -5,7 +5,11 @@ angular.module('stockchartApp')
 
     $scope.stocks = [];
 
+    $scope.isLoading = false;
+
     $http.get('/api/stocks').success(function (stocksFromDb) {
+
+      $scope.isLoading = false;
 
       // Will post a stock if empty to avoid errors
       if(stocksFromDb.length === 0){
@@ -56,6 +60,8 @@ angular.module('stockchartApp')
 
         $http.get(stockUrl)
           .success(function (data) {
+
+            $scope.isLoading = true;
 
 
             console.log('current URL:', currentUrl);
@@ -118,6 +124,8 @@ angular.module('stockchartApp')
                   }
                 }
               });
+
+              $scope.isLoading = false;
 
             }
           })
@@ -215,6 +223,7 @@ angular.module('stockchartApp')
 
       $scope.add = function () {
 
+
         $scope.userTypedStockName = $scope.userTypedStockName.toUpperCase();
 
         console.log($scope.stocks);
@@ -228,6 +237,7 @@ angular.module('stockchartApp')
 
           $http.get(currentUrl)
             .success(function (data) {
+              $scope.isLoading = true;
 
               var myData = data.dataset;
               console.log(myData);
@@ -270,6 +280,7 @@ angular.module('stockchartApp')
               console.log('namesObject: ', namesObject);
 
               chart.data.names(namesObject)
+              $scope.isLoading = false;
             })
             .error(function (error) {
               console.log('ERR:', error);
