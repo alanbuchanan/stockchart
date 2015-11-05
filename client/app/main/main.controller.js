@@ -3,12 +3,8 @@
 angular.module('stockchartApp')
 .controller('MainCtrl', function ($scope, $http, $mdToast) {
 
-    //**************************************************************
-    // Build a URL string for the query
-    //**************************************************************
-    $scope.userTypedStockName = '';
-
     $scope.stocks = [];
+
     $http.get('/api/stocks').success(function (stocksFromDb) {
 
       // Will post a stock if empty to avoid errors
@@ -91,9 +87,7 @@ angular.module('stockchartApp')
               chart = c3.generate({
                 data: {
                   x: 'x',
-                  columns: [
-                    datesToGraph, resultArr[0]
-                  ]
+                  columns: [datesToGraph].concat(resultArr)
                 },
                 axis: {
                   x: {
@@ -104,15 +98,6 @@ angular.module('stockchartApp')
                   }
                 }
               });
-
-              //Fill in the chart with remainder of array
-              for (var i = 1; i < resultArr.length; i++) {
-                chart.load({
-                  columns: [
-                    resultArr[i]
-                  ]
-                })
-              }
 
             }
           })
@@ -167,10 +152,10 @@ angular.module('stockchartApp')
           .join(' ');
       };
 
-      var showSimpleToast = function () {
+      var showSimpleToast = function (message) {
         $mdToast.show(
           $mdToast.simple()
-            .content('Please enter a valid stock name.')
+            .content(message)
             .position($scope.getToastPosition())
             .hideDelay(3000)
         );
@@ -178,6 +163,7 @@ angular.module('stockchartApp')
       //Toast end*****************************************************
 
       $scope.removeStock = function (stockName, index) {
+
         console.log(stockName);
         chart.unload({
           ids: [
@@ -193,13 +179,21 @@ angular.module('stockchartApp')
         });
       };
 
+      $scope.userTypedStockName = '';
 
       $scope.add = function () {
 
-        createQuandlQueryUrl($scope.userTypedStockName);
-        console.log('current URL:', currentUrl);
+        $scope.userTypedStockName = $scope.userTypedStockName.toUpperCase();
 
-        if ($scope.stocks.indexOf($scope.userTypedStockName === -1)) {
+        console.log($scope.stocks);
+
+        if ($scope.stocks.indexOf($scope.userTypedStockName) === -1) {
+
+          console.log('index of ' + $scope.userTypedStockName + ' is ' + $scope.stocks.indexOf($scope.userTypedStockName));
+
+          createQuandlQueryUrl($scope.userTypedStockName);
+          console.log('current URL:', currentUrl);
+
           $http.get(currentUrl)
             .success(function (data) {
 
@@ -221,7 +215,7 @@ angular.module('stockchartApp')
                 ]
               });
 
-              $scope.stocks.push(myData.dataset_code);
+              $scope.stocks.push($scope.userTypedStockName);
 
               $http.post('/api/stocks', {name: $scope.userTypedStockName.toUpperCase()}).success(function () {
                 console.log('post req successful');
@@ -233,21 +227,34 @@ angular.module('stockchartApp')
             })
             .error(function (error) {
               console.log('ERR:', error);
-              showSimpleToast();
+              showSimpleToast('Please enter a valid stock code.');
+              $scope.userTypedStockName = '';
             });
+        } else {
+          console.log('dupe');
+          showSimpleToast('That stock is already on the graph.');
+          $scope.userTypedStockName = '';
         }
       }
     });
 
+  })
+//**************************************************************
+// Build a URL string for the query
+//**************************************************************
+.config(function($mdThemingProvider) {
+    $mdThemingProvider.theme('default')
+      .primaryPalette('blue-grey')
+      .accentPalette('orange');
   });
 
-// TODO: clear input field after user enters invalid stock name
-// TODO: Make controller code dry, because there are repeating parts, especially with adding information to graph
-// TODO: c3: is there a way to init the chart without a stock inserted?
-// TODO: Change number format from 8000000 to 8.0, or similar
+// TODO: Prevent delete if array length is 1
 // TODO: Implement factory for angular material toast
-// TODO: Incorporate abhisekp's solution for loading the data on init instead of that for loop
 // TODO: Improve appearance of chart - look through C3 docs
-// TODO: favicon and title
-// TODO: explore angular material docs for cool stuff to add, eg fixing top menu with FAB toolbar
+// TODO: Make controller code dry, because there are repeating parts, especially with adding information to graph
+
+// TODO: Change number format from 8000000 to 8.0, or similar
 // TODO: find out if you can change the label because it would be nice to have 'Apple Inc (AAPL)' as opposed to just '(AAPL)'
+
+// TODO: favicon and title
+
