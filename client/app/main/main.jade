@@ -8,6 +8,11 @@ div(ng-include='"components/shell/shell.html"')
           md-icon(md-svg-src="content:send")
           input(ng-model="userTypedStockName", type="text", placeholder="Add a stock", style='text-transform:uppercase')
 
+  //Tab
+  md-tabs(md-dynamic-height, md-border-bottom, ng-hide="isLoading")
+    md-tab
+      | 6 months
+
   // Loading spinner
   div(ng-show="isLoading", layout="row", layout-sm="column", layout-align="space-around")
     md-progress-circular(md-mode="indeterminate")
@@ -16,7 +21,7 @@ div(ng-include='"components/shell/shell.html"')
   #chart(layout-wrap)
 
   // Buttons with remove capability
-  section(layout="row" layout-wrap)
+  section(layout="row", layout-wrap, ng-hide="isLoading")
     div(ng-repeat='stock in stocks')
       md-button.md-raised(ng-click="removeStock(stock, $index)")
         | {{stock}}
